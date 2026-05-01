@@ -10,7 +10,7 @@ import {
     updateProduct
 } from './src/controller/productcontrollers.js';
 
-// User controllers (UPDATED WITH LOGIN)
+ //User controllers (UPDATED WITH LOGIN)
 import {
   createUser,
   getUsers,
