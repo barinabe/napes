@@ -1,8 +1,13 @@
+//import prisma
+import { success } from 'zod';
 import { prisma } from '../config/prisma.js';
+import jwt from "jsonwebtoken";
 
-// CREATE
+//add product
 export const saveProduct = async (req, res) => {
-    try {
+ try{
+
+
         const product = await prisma.product.create({
             data: req.body
         });
@@ -17,69 +22,78 @@ export const saveProduct = async (req, res) => {
     }
 };
 
-// GET ALL
+//get product by all
 export const getProduct = async (req, res) => {
     try {
-        const products = await prisma.product.findMany();
-
-        res.json({
-            status: "success",
-            data: products
+        const product = await prisma.product.findMany();
+        res.status(200).json({
+            status: "data fecthed",
+            data: product
         });
     } catch (error) {
-        res.status(500).json({ status: "failed" });
+        console.log(error);
+        res.status(500).json({
+            status: "failed"
+        });
     }
 };
 
-// GET ONE
+
+//get product by id
 export const getProductId = async (req, res) => {
     try {
         const id = Number(req.params.id);
-
         const product = await prisma.product.findUnique({
-            where: { id }
+            where: {id}
         });
-
-        if (!product) {
-            return res.status(404).json({ status: "not found" });
+        res.status(200).json({
+            status: "fetched",
+            data: product
+        });
+    } catch (error) {
+        console.error(error);
+            res.status(500).json({
+                status: "failed"
+            });
         }
-
-        res.json({ status: "success", data: product });
-    } catch (error) {
-        res.status(500).json({ status: "failed" });
     }
-};
 
-// UPDATE
-export const updateProduct = async (req, res) => {
-    try {
+
+    //updae product
+    export const updateProduct = async (req, res) => {
+        try {
         const id = Number(req.params.id);
+    const updated = await prisma.product.update({
+        where: {id},
+        data: req.body
+    });
+    res.status(200).json({
+        status: "updated",
+        data: updated
+    })
+        } catch (error) {
+           console.error(error);
+           res.status(500).json({
+status: "failed"
+           });
+        }
+    };
 
-        const updated = await prisma.product.update({
-            where: { id },
-            data: req.body
-        });
-
-        res.json({
-            status: "updated",
-            data: updated
-        });
-    } catch (error) {
-        res.status(500).json({ status: "failed" });
-    }
-};
-
-// DELETE
-export const deleteProduct = async (req, res) => {
-    try {
+    //delete product
+    export const deleteProduct = async (req, res) => {
+        try {
         const id = Number(req.params.id);
-
         await prisma.product.delete({
-            where: { id }
-        });
-
-        res.json({ status: "deleted" });
-    } catch (error) {
-        res.status(500).json({ status: "failed" });
+            where: {id}
+           });
+           res.status(200).json({
+            status: "deleted"
+           });
+        
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                status: "failed"
+            });
+        }
     }
-};

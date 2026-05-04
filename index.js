@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import authRoutes from "./src/routes/authRoutes.js";
+
 // Product controllers
 import {
     deleteProduct,
@@ -10,7 +11,7 @@ import {
     updateProduct
 } from './src/controller/productcontrollers.js';
 
- //User controllers (UPDATED WITH LOGIN)
+ //User controllers
 import {
   createUser,
   getUsers,
@@ -23,6 +24,7 @@ import {
 // Prisma
 import { prisma } from './src/config/prisma.js';
 
+import {protect } from './src/middlewares/auth.js';
 dotenv.config();
 
 const app = express();
@@ -33,7 +35,7 @@ app.use("/auth", authRoutes);
 
 // PRODUCT ROUTES
 
-app.post('/product', saveProduct);
+app.post('/product',protect, saveProduct);
 app.get('/products', getProduct);
 app.get('/products/:id', getProductId);
 app.put('/products/:id', updateProduct);

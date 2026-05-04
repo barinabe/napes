@@ -2,9 +2,9 @@ import { prisma } from "../config/prisma.js";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 
-// =======================
+
 // LOGIN CONTROLLER
-// =======================
+
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
