@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import authRoutes from "./src/routes/authRoutes.js";
-
+                                                        
 // Product controllers
 import {
     deleteProduct,
@@ -38,8 +38,8 @@ app.use("/auth", authRoutes);
 app.post('/product',protect, saveProduct);
 app.get('/products', getProduct);
 app.get('/products/:id', getProductId);
-app.put('/products/:id', updateProduct);
-app.delete('/products/:id', deleteProduct);
+app.put('/products/:id',protect, updateProduct);
+app.delete('/products/:id',protect, deleteProduct);
 
 
 // USER ROUTES

@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 
+// Protect middleware (check token)
 export const protect = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -10,7 +11,7 @@ export const protect = (req, res, next) => {
         message: "No token provided",
       });
     }
-  
+
     const token = authHeader.split(" ")[1];
 
     const decoded = jwt.verify(
@@ -27,4 +28,15 @@ export const protect = (req, res, next) => {
       message: "Invalid or expired token",
     });
   }
+};
+
+// Admin middleware (authorization)
+export const adminOnly = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Access denied (admin only)",
+    });
+  }
+  next();
 };
