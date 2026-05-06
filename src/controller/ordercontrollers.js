@@ -1,9 +1,9 @@
 import { prisma } from "../config/prisma.js";
 import { z } from "zod";
 
+// ✅ CREATE ORDER
 export const createOrder = async (req, res) => {
   try {
-    // ✅ Validation schema
     const schema = z.object({
       userId: z.number(),
       products: z.array(
@@ -25,7 +25,6 @@ export const createOrder = async (req, res) => {
 
     const { userId, products } = result.data;
 
-    // ✅ Check user
     const user = await prisma.user.findUnique({
       where: { id: userId }
     });
@@ -39,23 +38,21 @@ export const createOrder = async (req, res) => {
 
     let totalPrice = 0;
 
-    // ✅ Loop properly
     for (const item of products) {
-      const productFromDb = await prisma.product.findUnique({
+      const product = await prisma.product.findUnique({
         where: { id: item.productId }
       });
 
-      if (!productFromDb) {
+      if (!product) {
         return res.status(404).json({
           success: "failed",
-          message: `Product with id ${item.productId} not found`
+          message: `Product ${item.productId} not found`
         });
       }
 
-      totalPrice += productFromDb.price * item.quantity;
+      totalPrice += product.price * item.quantity;
     }
 
-    // ✅ Create order
     const order = await prisma.order.create({
       data: {
         userId,
@@ -63,7 +60,6 @@ export const createOrder = async (req, res) => {
       }
     });
 
-    // ✅ Create ordered products
     for (const item of products) {
       await prisma.orderedProduct.create({
         data: {
@@ -76,12 +72,56 @@ export const createOrder = async (req, res) => {
 
     return res.status(201).json({
       success: "true",
-      message: "Order created successfully",
+      message: "Order created",
       order
     });
 
   } catch (error) {
-    console.error("Error creating order:", error);
+    console.error(error);
+    return res.status(500).json({
+      success: "failed",
+      message: "Internal server error"
+    });
+  }
+};
+
+
+// ✅ CONFIRM DELIVERY
+export const confirmOrderDelivered = async (req, res) => {
+  try {
+    const orderId = parseInt(req.params.id);
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId }
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: "failed",
+        message: "Order not found"
+      });
+    }
+
+    if (order.userId !== req.user.id) {
+      return res.status(403).json({
+        success: "failed",
+        message: "Not your order"
+      });
+    }
+
+    const updated = await prisma.order.update({
+      where: { id: orderId },
+      data: { status: "DELIVERED" }
+    });
+
+    return res.status(200).json({
+      success: "true",
+      message: "Order delivered",
+      order: updated
+    });
+
+  } catch (error) {
+    console.error(error);
     return res.status(500).json({
       success: "failed",
       message: "Internal server error"

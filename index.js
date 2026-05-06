@@ -6,7 +6,7 @@ import cors from "cors";
 import authRoutes from "./src/routes/authRoutes.js";
 
 // Controllers
-import { createOrder } from "./src/controller/ordercontrollers.js";
+import { createOrder, confirmOrderDelivered } from "./src/controller/ordercontrollers.js";
 
 // Product controllers
 import {
@@ -60,7 +60,7 @@ app.delete("/products/:id", protect, deleteProduct);
 // ORDER ROUTES
 // =====================
 app.post("/orders", protect, createOrder);
-
+app.put("/orders/:id/confirm", protect, confirmOrderDelivered);
 // =====================
 // USER ROUTES
 // =====================

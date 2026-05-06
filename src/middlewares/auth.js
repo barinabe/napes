@@ -1,42 +1,41 @@
 import jwt from "jsonwebtoken";
+import { prisma } from "../config/prisma.js";
 
-// Protect middleware (check token)
-export const protect = (req, res, next) => {
+export const protect = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader) {
       return res.status(401).json({
-        success: false,
-        message: "No token provided",
+        success: "failed",
+        message: "No token provided"
       });
     }
 
     const token = authHeader.split(" ")[1];
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "secretkey"
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = decoded;
+    // ✅ attach user to request
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id }
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        success: "failed",
+        message: "User not found"
+      });
+    }
+
+    req.user = user;
 
     next();
+
   } catch (error) {
     return res.status(401).json({
-      success: false,
-      message: "Invalid or expired token",
+      success: "failed",
+      message: "Invalid token"
     });
   }
-};
-
-// Admin middleware (authorization)
-export const adminOnly = (req, res, next) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({
-      success: false,
-      message: "Access denied (admin only)",
-    });
-  }
-  next();
 };
