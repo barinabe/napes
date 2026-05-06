@@ -25,11 +25,15 @@ export const saveProduct = async (req, res) => {
 //get product by all
 export const getProduct = async (req, res) => {
     try {
+
+ 
         const product = await prisma.product.findMany();
         res.status(200).json({
             status: "data fecthed",
             data: product
         });
+
+
     } catch (error) {
         console.log(error);
         res.status(500).json({
